@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="CubistAI Logo">
+  <defs>
+    <linearGradient id="cbGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="0.5" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0b0b14"/>
+  <!-- Cubist faceted cube: three visible faces -->
+  <g transform="translate(256 268)">
+    <!-- top face -->
+    <polygon points="0,-132 124,-66 0,0 -124,-66" fill="#a855f7"/>
+    <!-- left face -->
+    <polygon points="-124,-66 0,0 0,138 -124,72" fill="#6d28d9"/>
+    <!-- right face -->
+    <polygon points="124,-66 0,0 0,138 124,72" fill="#4f46e5"/>
+    <!-- facet highlight -->
+    <polygon points="0,-132 60,-99 0,-66 -60,-99" fill="#c084fc" opacity="0.7"/>
+  </g>
+</svg>
