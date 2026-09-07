@@ -10,7 +10,6 @@ import {
   Loader2,
   RefreshCw,
   Sparkles,
-  Upload,
   Wand2,
   X,
 } from 'lucide-react';
@@ -21,7 +20,6 @@ import { Footer } from '@/blocks/footer';
 import { BeforeAfterSlider } from '@/components/before-after-slider';
 import { ImageUploader, type ImageUploaderValue } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -29,8 +27,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { authClient } from '@/core/auth/client';
 import { apiPost } from '@/lib/api-client';
 import { m } from '@/paraglide/messages.js';
+import { getLocale } from '@/paraglide/runtime.js';
 import { cn } from '@/lib/utils';
 
 type EditorMode = 'edit' | 'style' | 'remove' | 'upscale';
@@ -44,7 +45,6 @@ function EditorPage() {
   const search = useSearch({ strict: false }) as { prompt?: string };
   const [mode, setMode] = useState<EditorMode>('edit');
   const [prompt, setPrompt] = useState(search.prompt ?? '');
-  const [photoItems, setPhotoItems] = useState<ImageUploaderValue[]>([]);
   const [refItems, setRefItems] = useState<ImageUploaderValue[]>([]);
   const [model, setModel] = useState('google/nano-banana-2');
   const [result, setResult] = useState<{
@@ -52,10 +52,18 @@ function EditorPage() {
     after: string;
   } | null>(null);
 
-  const hasPhoto = photoItems.some((i) => i.status === 'uploaded' && i.url);
-  const photoUrl = photoItems.find((i) => i.status === 'uploaded' && i.url)?.url;
+  // First uploaded image doubles as the primary source image (for edit /
+  // style / remove / upscale modes); the rest act as style references.
+  const uploadedRefs = refItems.filter((i) => i.status === 'uploaded' && i.url);
+  const photoUrl = uploadedRefs[0]?.url;
+  const hasPhotoOrPrompt = uploadedRefs.length > 0 || prompt.trim().length > 0;
 
-  const hasPhotoOrPrompt = hasPhoto || prompt.trim().length > 0;
+  const redirectToSignIn = useCallback(() => {
+    const loc = getLocale();
+    const prefix = loc === 'en' ? '' : `/${loc}`;
+    const current = window.location.pathname + window.location.search;
+    window.location.href = `${prefix}/sign-in?redirect=${encodeURIComponent(current)}`;
+  }, []);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -66,8 +74,8 @@ function EditorPage() {
       return apiPost<GenerateResult>('/api/editor/generate', {
         mode,
         prompt,
-        image_url: photoUrl,
-        reference_images: refUrls,
+        image_url: refUrls[0],
+        reference_images: refUrls.slice(1),
         model,
       });
     },
@@ -78,37 +86,74 @@ function EditorPage() {
       });
     },
     onError: (err: any) => {
-      toast.error(err?.message || m['editor.error.generate_failed']());
+      const msg = err?.message;
+      if (msg === 'content_blocked') {
+        toast.error(m['editor.error.content_blocked']());
+        return;
+      }
+      if (msg === 'content_review') {
+        toast.error(m['editor.error.content_review']());
+        return;
+      }
+      if (msg === 'Insufficient credits') {
+        toast.error(m['editor.error.insufficient_credits']());
+        return;
+      }
+      if (/unauthorized/i.test(msg || '')) {
+        // Session may have expired mid-flow — send the user to sign in.
+        toast.error(m['editor.error.sign_in_required']());
+        redirectToSignIn();
+        return;
+      }
+      toast.error(msg || m['editor.error.generate_failed']());
     },
   });
 
-  const handleGenerate = useCallback(() => {
-    if (!photoUrl && !prompt.trim()) {
+  const handleGenerate = useCallback(async () => {
+    const hasImg = refItems.some((i) => i.status === 'uploaded' && i.url);
+    if (!hasImg && !prompt.trim()) {
       toast.error(m['editor.error.no_prompt']());
       return;
     }
-    if (mode !== 'edit' && !photoUrl) {
+    if (mode !== 'edit' && !hasImg) {
       toast.error(m['editor.error.no_photo']());
       return;
     }
+
+    // Require sign-in before hitting the paid generation API — show a
+    // friendly prompt instead of a raw "Unauthorized" error.
+    const { data: session } = await authClient.getSession();
+    if (!session?.user) {
+      toast.error(m['editor.error.sign_in_required']());
+      redirectToSignIn();
+      return;
+    }
+
     setResult(null);
     generateMutation.mutate();
-  }, [photoUrl, prompt, mode, generateMutation]);
+  }, [refItems, prompt, mode, generateMutation, redirectToSignIn]);
 
   const handleReset = () => {
     setResult(null);
     setPrompt('');
-    setPhotoItems([]);
     setRefItems([]);
   };
 
   const handleDownload = () => {
     if (!result?.after) return;
+    const src = result.after;
     const a = document.createElement('a');
-    a.href = result.after;
-    a.download = `cubistai-${Date.now()}.png`;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
+    if (src.startsWith('data:')) {
+      // Data URLs are same-document; download works directly.
+      a.href = src;
+      a.download = `cubistai-${Date.now()}.png`;
+    } else {
+      // Cross-origin URLs (R2/provider) can't use the download attribute, so
+      // route through a same-origin proxy that streams the bytes back with a
+      // Content-Disposition: attachment header.
+      a.href = `/api/editor/download?url=${encodeURIComponent(src)}`;
+      a.download = `cubistai-${Date.now()}.png`;
+    }
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -171,41 +216,24 @@ function EditorPage() {
               ))}
             </div>
 
-            {/* Photo upload */}
+            {/* Reference / source image upload — single card. The first
+                image doubles as the source for edit-style modes, the rest
+                act as style references. */}
             <div className="rounded-2xl border border-border bg-card p-5">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-medium">
-                <Upload className="size-4" />
-                {m['editor.photo.title']()}
+                <ImageIcon className="size-4" />
+                {m['editor.reference.title']()}
               </h3>
               <p className="text-muted-foreground mb-3 text-xs">
-                {m['editor.photo.description']()}
+                {m['editor.reference.description']()}
               </p>
               <ImageUploader
-                allowMultiple={false}
-                maxImages={1}
-                maxSizeMB={20}
-                onChange={setPhotoItems}
+                allowMultiple
+                maxImages={3}
+                maxSizeMB={10}
+                onChange={setRefItems}
               />
             </div>
-
-            {/* Reference images */}
-            {mode !== 'upscale' && (
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <h3 className="mb-3 flex items-center gap-2 text-sm font-medium">
-                  <ImageIcon className="size-4" />
-                  {m['editor.reference.title']()}
-                </h3>
-                <p className="text-muted-foreground mb-3 text-xs">
-                  {m['editor.reference.description']()}
-                </p>
-                <ImageUploader
-                  allowMultiple
-                  maxImages={3}
-                  maxSizeMB={10}
-                  onChange={setRefItems}
-                />
-              </div>
-            )}
 
             {/* Prompt */}
             <div className="rounded-2xl border border-border bg-card p-5">
@@ -347,6 +375,11 @@ import { createFileRoute } from '@tanstack/react-router';
 export const Route = createFileRoute('/editor')({
   validateSearch: (search: Record<string, unknown>) => ({
     prompt: typeof search.prompt === 'string' ? search.prompt : undefined,
+  }),
+  head: () => ({
+    meta: [
+      { title: m['seo.editor.title']({}, { locale: getLocale() }) },
+    ],
   }),
   component: EditorPage,
 });

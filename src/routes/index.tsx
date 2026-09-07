@@ -30,6 +30,33 @@ function HomePage() {
         <CTA />
       </main>
       <Footer />
+      {/* Fazier launch badge — required by the Fazier listing. Swap the href
+          to the product's Fazier launch page once the submission is live. */}
+      <div className="bg-background flex justify-center py-4">
+        <a
+          href="https://fazier.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Fazier badge"
+        >
+          <img
+            src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&theme=light"
+            width={120}
+            height={40}
+            alt="Fazier badge"
+            loading="lazy"
+            className="dark:hidden"
+          />
+          <img
+            src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&theme=dark"
+            width={120}
+            height={40}
+            alt="Fazier badge"
+            loading="lazy"
+            className="hidden dark:block"
+          />
+        </a>
+      </div>
       <SupportWidget />
     </div>
   );
@@ -38,13 +65,30 @@ function HomePage() {
 export const Route = createFileRoute('/')({
   head: () => {
     const locale = getLocale();
+    const t = (key: string) =>
+      m[`seo.home.${key}`]({}, { locale: locale as any });
     const urlFor = (loc: string) =>
       localizeUrl(`${envConfigs.app_url}/`, { locale: loc as any }).href;
     return {
       meta: [
+        { title: t('title') },
+        { name: 'description', content: t('description') },
+        { name: 'keywords', content: t('keywords') },
+        { property: 'og:title', content: t('title') },
+        { property: 'og:description', content: t('description') },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: urlFor(locale) },
         {
-          name: 'description',
-          content: m['landing.hero.subheadline']({}, { locale: locale as any }),
+          property: 'og:image',
+          content: `${envConfigs.app_url}/tools/headshot.png`,
+        },
+        { property: 'og:site_name', content: 'CubistAI' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: t('title') },
+        { name: 'twitter:description', content: t('description') },
+        {
+          name: 'twitter:image',
+          content: `${envConfigs.app_url}/tools/headshot.png`,
         },
       ],
       links: [

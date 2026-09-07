@@ -10,7 +10,7 @@ export const Route = createFileRoute('/pricing')({
   loader: () => {
     const locale = getLocale();
     return {
-      title: m['landing.pricing.title']({}, { locale }),
+      title: m['seo.pricing.title']({}, { locale }),
       description: m['landing.pricing.description']({}, { locale }),
     };
   },

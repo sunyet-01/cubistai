@@ -1,142 +1,162 @@
-# ShipAny Next
+<div align="center">
 
-A headless SaaS engine for building AI-powered products with Claude Code. Pre-wired business logic (payments, credits, subscriptions, auth, RBAC, i18n, CMS) with minimal UI — you build your product pages on top.
+<img src="public/logo.svg" alt="CubistAI" width="72" />
 
-## Quick Start
+# CubistAI
+
+**Turn text into stunning images — in seconds.**
+
+Free AI image generator with 9+ state-of-the-art models, 14 specialized creative tools,
+and a credit-based SaaS engine — all in one web app.
+
+**[🌐 Live at cubistai.org](https://cubistai.org)** · [Editor](https://cubistai.org/editor) · [Pricing](https://cubistai.org/pricing)
+
+![License](https://img.shields.io/badge/license-proprietary-blue)
+![Stack](https://img.shields.io/badge/stack-TanStack_Start_%2B_React_19-8f4bff)
+![i18n](https://img.shields.io/badge/i18n-EN_%7C_%E4%B8%AD%E6%96%87_%7C_%E6%97%A5%E6%9C%AC%E8%AA%9E_%7C_%E7%B9%81%E4%BD%93-green)
+![Deploy](https://img.shields.io/badge/deploy-Cloudflare_Workers-f38020)
+
+</div>
+
+---
+
+<!-- Showcase — 4 generated samples -->
+<div align="center">
+
+| | |
+|:---:|:---:|
+| ![Sample 1](public/inspiration/01.png) | ![Sample 2](public/inspiration/02.png) |
+| ![Sample 3](public/inspiration/03.png) | ![Sample 4](public/inspiration/04.png) |
+
+*All samples above were generated with CubistAI.*
+
+</div>
+
+## ✨ Why CubistAI
+
+- **🎨 Multi-model editor** — GPT Image, Seedream, Nano Banana (Gemini Image), FLUX.2 Pro and more, behind a single prompt box. No separate accounts, no API juggling.
+- **🧰 14 ready-made creative tools** — headshots, cartoon avatars, coloring pages, LinkedIn photos, background removal, watermark cleanup, poster & jersey design…
+- **🖼 Up to 4K, multi-image output** — generate up to 4 images per task with aspect-ratio control and reference-image support.
+- **🌍 Truly bilingual (plus)** — full UI in English, 简体中文, 日本語 and 繁體中文 with locale-aware routing.
+- **💳 Complete SaaS engine** — credits (FIFO consumption + expiry), subscriptions, one-time passes, RBAC admin panel, invite codes, API keys — all built in.
+- **🛡 Content safety built-in** — layered prompt moderation (keyword filter → SDK scan → configurable HTTP endpoint) before any generation.
+- **⚡ Edge-ready** — deploys to Cloudflare Workers with D1 + R2. No servers to babysit.
+
+## 🧰 Creative Tools
+
+<div align="center">
+
+| | | |
+|:---:|:---:|:---:|
+| ![AI Headshot](public/tools/headshot.png) | ![Cartoon Avatar](public/tools/cartoon.png) | ![Coloring Page](public/tools/coloring.png) |
+| **AI Headshot** | **Cartoon Avatar** | **Coloring Page** |
+| ![LinkedIn Photo](public/tools/linkedin.png) | ![Profile Picture](public/tools/profile-picture.png) | ![Action Figure](public/tools/action-figure.png) |
+| **LinkedIn Photo** | **Profile Picture** | **Action Figure** |
+| ![Age Filter](public/tools/age-filter.png) | ![Hair Color](public/tools/hair-color.png) | ![Expander](public/tools/expander.png) |
+| **Age Filter** | **Hair Color** | **Image Expander** |
+| ![Remove BG](public/tools/remove-bg.png) | ![Watermark Remover](public/tools/watermark.png) | ![AI Video](public/tools/video.png) |
+| **Remove Background** | **Watermark Remover** | **AI Video** |
+
+</div>
+
+Plus a special **🏆 World Cup 2026 toolkit** — jersey design, match posters and fan coloring pages:
+
+<div align="center">
+
+| Jersey Designer | Match Poster | Fan Coloring |
+|:---:|:---:|:---:|
+| ![Jersey](public/worldcup/jersey.png) | ![Poster](public/worldcup/poster.png) | ![Coloring](public/worldcup/coloring.png) |
+
+</div>
+
+## 💰 Pricing
+
+| Plan | Price | Credits | Highlights |
+| ---- | ----- | ------- | ---------- |
+| **Free** | $0 | daily refresh | 4 image models, up to 1K |
+| **Starter** | $7.90/mo | 1,100/mo | 6 models, up to 2K, permanent history |
+| **Plus** ⭐ | $14.90/mo | 2,000/mo | 7 models, up to 4K, video models |
+| **Pro** | $27.90/mo | 4,000/mo | all models, 4 img/task, credit rollover |
+| **Lifetime** | one-time | up to 10M | pay once, use forever |
+
+👉 Full details at [cubistai.org/pricing](https://cubistai.org/pricing)
+
+## 🛠 Tech Stack
+
+- **Framework** — [TanStack Start](https://tanstack.com/start) (Vite 8 + Nitro, React 19, TypeScript strict)
+- **UI** — shadcn/ui v4 · Tailwind CSS 4 (oklch) · TanStack Query / Form / Table
+- **Auth** — better-auth (email/password + OAuth) with RBAC
+- **Database** — Drizzle ORM: SQLite / PostgreSQL / MySQL / Turso / Cloudflare D1
+- **i18n** — Paraglide JS (compiled messages, locale-aware routing)
+- **AI** — pluggable providers: Gemini (native), OpenRouter, Replicate
+- **Payments** — Stripe / PayPal / Creem / Waffo (checkout, webhooks, credit atomicity)
+- **Deploy** — Cloudflare Workers + D1 + R2, or any Node host (Docker included)
+
+## 🚀 Quick Start
 
 ```bash
+# 1. Install dependencies (pnpm required)
 pnpm install
-cp .env.example .env.development   # then fill in the values (AUTH_SECRET etc.)
+
+# 2. Configure environment
+cp .env.example .env.development   # fill in AUTH_SECRET etc.
+
+# 3. Create database tables
 pnpm db:push
+
+# 4. Initialize roles + admin user
 pnpm rbac:init --admin-email=admin@example.com --admin-password=your-password
-pnpm dev
+
+# 5. Start dev server
+pnpm dev   # → http://localhost:3000
 ```
 
-> Local env lives in `.env.development` (gitignored). It is loaded by both Vite
-> (`vite dev`) and the `db:*` scripts. Only `VITE_APP_URL`, `VITE_APP_NAME`,
-> `DATABASE_PROVIDER`, `DATABASE_URL`, and `AUTH_SECRET` are required to boot.
+> Only `VITE_APP_URL`, `VITE_APP_NAME`, `DATABASE_PROVIDER`, `DATABASE_URL` and `AUTH_SECRET`
+> are required to boot. AI generation works out of the box once a provider key is set
+> in the admin panel (**Settings → AI**).
 
-## Features
+## ☁️ Deploy to Cloudflare Workers
 
-- **Auth** — Email/password + Google/GitHub OAuth via better-auth
-- **Payment** — Stripe, PayPal, Alipay, WeChat Pay (checkout, subscriptions, webhooks)
-- **Credits** — FIFO consumption, expiration, auto-grant on signup
-- **RBAC** — Roles, permissions, wildcard matching, admin panel management
-- **API Keys** — CRUD + validation
-- **Invite Codes** — Trial activation, batch generation, usage tracking
-- **CMS** — Categories and posts with full CRUD
-- **Image Upload** — Drop / paste / click uploader; uses S3/R2 if configured, falls back to inline base64 (size-capped) stored in DB
-- **i18n** — English + Chinese via Paraglide JS (compiled messages, dot-keyed JSON), locale-aware routing
-- **Admin Panel** — Full-featured admin with grouped sidebar navigation:
-  - **RBAC** — Users (role assignment), Roles (permission management), Permissions
-  - **Content** — Categories, Posts (with status tabs, category selector)
-  - **Billing** — Payments, Subscriptions, Credits (with type/status tabs)
-  - **Settings** — Collapsible config groups (General, Auth, Payment, Email, Storage, AI)
-  - System switcher dropdown (Admin / Dashboard / Landing)
-- **Dashboard** — Client-side rendered with shadcn sidebar
-- **MDX Pages** — Privacy policy, terms of service (content in `src/content/pages/`), extensible via skill
-- **Database** — SQLite (dev) / PostgreSQL / MySQL via Drizzle ORM
-- **All code self-contained** — no external packages for business logic
+```bash
+cp wrangler.example.jsonc wrangler.jsonc   # set your D1 database id
+pnpm cf:build
+wrangler d1 execute <your-db> --remote --file=./drizzle/<migration>.sql
+wrangler secret put AUTH_SECRET
+wrangler secret put CONFIG_ENCRYPTION_KEY
+wrangler deploy
+```
 
-## Tech Stack
+Production image persistence requires R2/S3 (**Settings → Storage** in the admin panel).
+Workers have no disk — see `wrangler.jsonc` bindings.
 
-- TanStack Start (RC, Vite 8 + nitro, React 19, TypeScript)
-- TanStack Query, Form, and Table for data, forms, and tables
-- shadcn/ui v4 (Base Nova style, Tailwind CSS 4)
-- better-auth + Drizzle ORM
-- Paraglide JS for i18n
-
-## Project Structure
+## 📂 Project Structure
 
 ```
 src/
-├── core/           # Infrastructure (db, auth, payment, email, storage, ai, i18n)
-├── modules/        # Business logic (payment, credits, subscriptions, apikeys, rbac, posts, taxonomy)
-├── config/         # Environment, DB schema, locale names
-├── routes/         # File-based routes (locale-free paths; /zh prefix via router rewrite)
-│   ├── *.tsx       # Pages (landing, auth, settings, admin, legal)
-│   └── api/        # Server routes (REST endpoints)
-├── content/pages/  # MDX content for static pages
-├── hooks/          # Shared react-query hooks
-├── components/     # Shared UI (app-layout, app-sidebar, data-table, form-field, user-menu, shadcn)
-└── lib/            # Utilities (api-client, query-client, hash, resp, cookie, cache, rate-limit)
+├── core/           # Infrastructure: db, auth, payment, storage, ai, i18n, content-safety
+├── modules/        # Business logic: payment, credits, subscriptions, rbac, ai-tasks
+├── routes/         # File-based routes (pages + REST API)
+├── blocks/         # Page sections (hero, pricing, toolkit, faq…)
+├── components/     # Shared UI (shadcn/ui primitives, data-table, form-field)
+├── content/pages/  # MDX legal pages (ToS, Privacy, AUP)
+└── config/         # Env config, DB schema, pricing, locales
 
-messages/{en,zh}.json    # Translation source (flat dot-keyed)
-project.inlang/          # Inlang project config
-src/paraglide/           # Compiled messages + runtime (gitignored, generated)
+messages/           # Translation source (en, zh, zh-tw, ja — flat dot-keyed)
 ```
 
-## Admin Panel
+## 🔗 Links
 
-The admin panel (`/admin`) provides a complete back-office interface:
+- **Website:** [https://cubistai.org](https://cubistai.org)
+- **Editor:** [cubistai.org/editor](https://cubistai.org/editor)
+- **Pricing:** [cubistai.org/pricing](https://cubistai.org/pricing)
 
-| Section  | Pages                            | Features                                          |
-| -------- | -------------------------------- | ------------------------------------------------- |
-| Overview | Dashboard                        | Stats overview                                    |
-| RBAC     | Users, Roles, Permissions        | Full CRUD, role assignment, permission management |
-| Content  | Categories, Posts                | Full CRUD, status tabs, category selector         |
-| Billing  | Payments, Subscriptions, Credits | Server-side pagination, type/status tabs, search  |
-| Settings | System config                    | Collapsible groups, tabbed sections, all i18n     |
+## 📄 License
 
-All admin pages include:
+Copyright © CubistAI. This is proprietary software — see [LICENSE](./LICENSE).
+Built on the [ShipAny Next](https://shipany.ai) SaaS template.
 
-- Server-side paginated data tables with search
-- Dialog-based create/edit/delete forms
-- Complete English and Chinese translations
+<div align="center">
 
-## Commands
+**[ Start creating at cubistai.org → ](https://cubistai.org)**
 
-| Command            | Description                                      |
-| ------------------ | ------------------------------------------------ |
-| `pnpm dev`         | Start Vite dev server (port 3000)                |
-| `pnpm build`       | Production build                                 |
-| `pnpm start`       | Run the production server                        |
-| `pnpm db:setup`    | Copy schema template for chosen database         |
-| `pnpm db:push`     | Push schema to database (dev)                    |
-| `pnpm db:generate` | Generate migration SQL (production)              |
-| `pnpm db:migrate`  | Run migrations (production)                      |
-| `pnpm db:studio`   | Drizzle Studio GUI                               |
-| `pnpm rbac:init`   | Create roles + permissions + optional admin user |
-| `pnpm rbac:assign` | Assign role to user                              |
-
-## Claude Code Skills
-
-| Skill              | What it does                                        |
-| ------------------ | --------------------------------------------------- |
-| `/quick-start`     | Build a complete SaaS from a brief or reference URL |
-| `/new-module`      | Create a backend module (service + API)             |
-| `/new-page`        | Create a dashboard page (client component + nav)    |
-| `/new-static-page` | Create an MDX content page (legal, about, FAQ)      |
-
-## Environment Variables
-
-```env
-# Required (public vars use the VITE_ prefix; secrets stay server-only)
-VITE_APP_URL=http://localhost:3000
-VITE_APP_NAME=My App
-VITE_APP_LOGO=/logo.png
-DATABASE_PROVIDER=sqlite
-DATABASE_URL=file:data/local.db
-AUTH_SECRET=generate-with-openssl-rand-base64-32
-
-# Optional
-VITE_DEFAULT_LOCALE=en
-STRIPE_SECRET_KEY=
-RESEND_API_KEY=
-REPLICATE_API_TOKEN=
-
-# Storage (optional — image upload falls back to inline base64 if unset)
-STORAGE_ENDPOINT=
-STORAGE_REGION=auto
-STORAGE_ACCESS_KEY=
-STORAGE_SECRET_KEY=
-STORAGE_BUCKET=
-STORAGE_PUBLIC_DOMAIN=
-INLINE_IMAGE_MAX_KB=2048
-```
-
-## License
-
-This is proprietary software. See [LICENSE](./LICENSE) for the full license agreement.
-
-**ShipAny** — [shipany.ai](https://shipany.ai)
+</div>

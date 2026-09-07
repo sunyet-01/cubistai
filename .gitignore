@@ -68,3 +68,6 @@ package-lock.json
 
 # local assistant / project state (never commit)
 .workbuddy/
+
+# internal business draft (do not publish)
+waffo-application-draft.md

@@ -74,7 +74,7 @@ function SettingsLayout() {
       navItems={navItems}
       footerNavItems={footerNavItems}
       brand={envConfigs.app_name}
-      brandHref="/settings"
+      brandHref="/"
     >
       <Outlet />
       <SupportWidget />

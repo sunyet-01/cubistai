@@ -74,8 +74,18 @@ export const Route = createRootRoute({
         { name: 'description', content: envConfigs.app_description },
       ],
       links: [
-        { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
-        { rel: 'apple-touch-icon', href: '/favicon.svg' },
+        { rel: 'icon', href: '/favicon.svg?v=2', type: 'image/svg+xml' },
+        {
+          rel: 'icon',
+          href: '/favicon-32.png?v=2',
+          type: 'image/png',
+          sizes: '32x32',
+        },
+        {
+          rel: 'apple-touch-icon',
+          href: '/apple-touch-icon.png?v=2',
+          sizes: '180x180',
+        },
         ...locales.map((loc) => ({
           rel: 'alternate',
           hrefLang: loc,
@@ -130,6 +140,7 @@ function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang={getLocale()} suppressHydrationWarning>
       <head>
+        <meta name="waffo-verify" content="247dd1214151082184327dac3268a697" />
         <HeadContent />
       </head>
       <body className="font-sans antialiased">

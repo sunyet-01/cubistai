@@ -84,6 +84,8 @@ export default defineConfig({
           localized: [
             ['en', '/api/:path(.*)?'],
             ['zh', '/api/:path(.*)?'],
+            ['zh-tw', '/api/:path(.*)?'],
+            ['ja', '/api/:path(.*)?'],
           ],
         },
         // Bare locale homes match without a trailing-slash redirect.
@@ -91,14 +93,19 @@ export default defineConfig({
           pattern: '/',
           localized: [
             ['zh', '/zh'],
+            ['zh-tw', '/zh-tw'],
+            ['ja', '/ja'],
             ['en', '/'],
           ],
         },
-        // "as-needed" prefix: zh under /zh, en (default) unprefixed.
+        // "as-needed" prefix: zh under /zh, zh-tw under /zh-tw, ja under /ja,
+        // en unprefixed.
         {
           pattern: '/:path(.*)?',
           localized: [
             ['zh', '/zh/:path(.*)?'],
+            ['zh-tw', '/zh-tw/:path(.*)?'],
+            ['ja', '/ja/:path(.*)?'],
             ['en', '/:path(.*)?'],
           ],
         },

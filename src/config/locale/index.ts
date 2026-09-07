@@ -3,5 +3,7 @@
 // exposed at runtime via @/paraglide/runtime.js (locales, baseLocale).
 export const localeNames: Record<string, string> = {
   en: 'English',
-  zh: '中文',
+  zh: '简体中文',
+  'zh-tw': '繁體中文',
+  ja: '日本語',
 };

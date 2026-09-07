@@ -13,6 +13,7 @@ const FAQ_KEYS = [
   'free',
   'commercial',
   'models',
+  'safety',
 ] as const;
 
 export function FAQ() {

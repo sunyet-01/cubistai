@@ -6,6 +6,7 @@ import {
   CreemProvider,
   PaymentManager,
   StripeProvider,
+  WaffoProvider,
   WechatPayProvider,
 } from '@/core/payment';
 import {
@@ -55,6 +56,10 @@ async function getPaymentManager(): Promise<PaymentManager> {
     c('alipay_app_id'),
     c('wechat_mch_id'),
     c('default_payment_provider'),
+    c('waffo_merchant_id'),
+    c('waffo_private_key'),
+    c('waffo_store_id'),
+    c('waffo_product_ids_mapping'),
   ]);
   if (manager && hash === managerConfigHash) return manager;
 
@@ -116,6 +121,26 @@ async function getPaymentManager(): Promise<PaymentManager> {
         serialNo: c('wechat_serial_no'),
         notifyUrl: c('wechat_notify_url') || undefined,
         platformCert: c('wechat_platform_cert') || undefined,
+      }),
+      isDefault
+    );
+  }
+
+  // Waffo requires explicit opt-in (Enable Waffo) so it never becomes the
+  // default before the store is approved for production payments.
+  if (
+    c('waffo_enabled') === 'true' &&
+    c('waffo_merchant_id') &&
+    c('waffo_private_key') &&
+    c('waffo_store_id')
+  ) {
+    const isDefault = c('default_payment_provider') === 'waffo';
+    manager.addProvider(
+      new WaffoProvider({
+        merchantId: c('waffo_merchant_id'),
+        privateKey: c('waffo_private_key'),
+        storeId: c('waffo_store_id'),
+        productIdsMapping: c('waffo_product_ids_mapping') || undefined,
       }),
       isDefault
     );
@@ -282,21 +307,30 @@ async function handleCheckoutSuccess(session: any, provider: string) {
   // Different providers expose the session identifier under different keys.
   // We try the common shapes; for Alipay the natural key is out_trade_no
   // (which equals our orderNo and the value we stored in paymentSessionId).
+  // Waffo webhooks carry no session id — they ship our order no instead via
+  // orderMerchantExternalId, so we match by orderNo when present.
   const result = session.paymentResult || {};
+  const orderNo: string = result.orderMerchantExternalId || result.orderNo || '';
   const sessionId: string =
     result.id ||
     result.object?.id ||
     result.out_trade_no ||
     result.outTradeNo ||
     '';
-  if (!sessionId) return;
+  if (!orderNo && !sessionId) return;
 
-  // Find order by session ID
-  const [existingOrder] = await db()
-    .select()
-    .from(order)
-    .where(and(eq(order.paymentSessionId, sessionId), isNull(order.deletedAt)))
-    .limit(1);
+  // Find order by order no (preferred) or session ID
+  const [existingOrder] = orderNo
+    ? await db()
+        .select()
+        .from(order)
+        .where(and(eq(order.orderNo, orderNo), isNull(order.deletedAt)))
+        .limit(1)
+    : await db()
+        .select()
+        .from(order)
+        .where(and(eq(order.paymentSessionId, sessionId), isNull(order.deletedAt)))
+        .limit(1);
 
   if (!existingOrder) return;
 

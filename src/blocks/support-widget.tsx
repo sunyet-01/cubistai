@@ -7,6 +7,8 @@ import { Link } from '@/core/i18n/navigation';
 import { apiPost } from '@/lib/api-client';
 import { currentPathWithQuery } from '@/lib/redirect';
 import { cn } from '@/lib/utils';
+import { envConfigs } from '@/config';
+import { usePublicConfig } from '@/hooks/use-public-config';
 import { m } from '@/paraglide/messages.js';
 import { ImageUploader } from '@/components/image-uploader';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -30,6 +32,10 @@ import { Textarea } from '@/components/ui/textarea';
  */
 export function SupportWidget() {
   const { data: session, isPending } = useSession();
+  const { data: configsData } = usePublicConfig();
+  const configs = configsData ?? {};
+  const supportEmail =
+    (configs as Record<string, string>).support_email || envConfigs.support_email;
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -94,6 +100,12 @@ export function SupportWidget() {
               >
                 {m['common.support.sign_in']()}
               </Link>
+              <a
+                href={`mailto:${supportEmail}`}
+                className="text-primary text-sm font-medium underline underline-offset-4 hover:opacity-80"
+              >
+                {supportEmail}
+              </a>
             </div>
           ) : (
             <form

@@ -6,7 +6,7 @@ import { m } from '@/paraglide/messages.js';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 
-type Badge = 'hot' | 'hotnew' | 'new' | null;
+type Badge = 'hot' | 'hotnew' | 'new' | 'soon' | null;
 
 interface Tool {
   key: string;
@@ -14,79 +14,80 @@ interface Tool {
   badge: Badge;
   image: string;
   icon: LucideIcon;
+  /** Not yet launched — renders a non-clickable card with a SOON badge. */
+  comingSoon?: boolean;
 }
 
 /**
  * CubistAI toolkit — AI image generators grid + photo editing tools grid.
+ *
+ * All tools route into the live editor with a pre-filled prompt (the editor is
+ * the single working entry point; dedicated tool pages are not built yet).
+ * Not-yet-launched tools (e.g. video) are marked coming soon instead of
+ * linking to a 404.
  */
 export function Toolkit() {
   const generators: Tool[] = [
     {
-      key: 'gpt_image_2',
-      href: '/tools/gpt-image-2',
-      badge: 'hotnew',
-      image: '/tools/gpt-image-2.png',
-      icon: Sparkles,
-    },
-    {
       key: 'headshot',
-      href: '/tools/ai-headshot-generator',
+      href: '/editor?prompt=Professional studio headshot portrait, soft lighting, clean background',
       badge: 'hot',
       image: '/tools/headshot.png',
       icon: Sparkles,
     },
     {
       key: 'cartoon',
-      href: '/tools/ai-cartoon-generator',
+      href: '/editor?prompt=Cute cartoon avatar, bold outlines, vibrant colors',
       badge: null,
       image: '/tools/cartoon.png',
       icon: Sparkles,
     },
     {
       key: 'coloring',
-      href: '/tools/ai-coloring-page-generator',
+      href: '/editor?prompt=Black and white coloring book page, thick outlines',
       badge: null,
       image: '/tools/coloring.png',
       icon: Sparkles,
     },
     {
       key: 'nano_banana',
-      href: '/tools/nano-banana-2',
+      href: '/editor?prompt=Playful illustration in a modern flat style',
       badge: 'new',
       image: '/tools/nano-banana.png',
       icon: Sparkles,
     },
     {
       key: 'video',
-      href: '/tools/ai-video-generator',
-      badge: 'new',
+      href: '',
+      badge: 'soon',
       image: '/tools/video.png',
       icon: Sparkles,
+      comingSoon: true,
     },
     {
       key: 'linkedin',
-      href: '/tools/ai-linkedin-headshot',
+      href: '/editor?prompt=Professional LinkedIn profile headshot, business attire, neutral background',
       badge: 'new',
       image: '/tools/linkedin.png',
       icon: Sparkles,
     },
     {
       key: 'action_figure',
-      href: '/tools/ai-action-figure-generator',
+      href: '/editor?prompt=Stylized action figure toy render, dramatic lighting',
       badge: null,
       image: '/tools/action-figure.png',
       icon: Sparkles,
     },
     {
       key: 'profile_picture',
-      href: '/tools/cartoon-profile-picture',
+      href: '/editor?prompt=Fun cartoon profile picture, bright background',
       badge: null,
       image: '/tools/profile-picture.png',
       icon: Sparkles,
     },
     {
       key: 'age_filter',
-      href: '/tools/ai-age-filter',
+      href: '/editor?prompt=Portrait photo, natural skin texture',
       badge: null,
       image: '/tools/age-filter.png',
       icon: Sparkles,
@@ -96,28 +97,28 @@ export function Toolkit() {
   const editing: Tool[] = [
     {
       key: 'remove_bg',
-      href: '/tools/remove-bg',
+      href: '/editor?prompt=Remove the background and make it transparent',
       badge: null,
       image: '/tools/remove-bg.png',
       icon: Sparkles,
     },
     {
       key: 'expander',
-      href: '/tools/image-expander',
+      href: '/editor?prompt=Expand the image canvas seamlessly',
       badge: null,
       image: '/tools/expander.png',
       icon: Sparkles,
     },
     {
       key: 'watermark',
-      href: '/tools/watermark-remover',
+      href: '/editor?prompt=Remove watermarks and clean up artifacts',
       badge: 'new',
       image: '/tools/watermark.png',
       icon: Sparkles,
     },
     {
       key: 'hair_color',
-      href: '/tools/ai-hair-color-changer',
+      href: '/editor?prompt=Change the hair color naturally',
       badge: null,
       image: '/tools/hair-color.png',
       icon: Sparkles,
@@ -171,7 +172,7 @@ export function Toolkit() {
               </p>
             </div>
             <Link
-              href="/tools/ai-photo-editor"
+              href="/editor"
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
                 'shrink-0 gap-1'
@@ -193,12 +194,10 @@ export function Toolkit() {
 }
 
 function ToolCard({ tool }: { tool: Tool }) {
-  const { image, href, key, badge } = tool;
-  return (
-    <Link
-      href={href}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
-    >
+  const { image, href, key, badge, comingSoon } = tool;
+
+  const inner = (
+    <>
       {badge && <BadgePill type={badge} />}
 
       {/* Real example image — full bleed */}
@@ -227,6 +226,23 @@ function ToolCard({ tool }: { tool: Tool }) {
           {tDynamic(`landing.toolkit.${key}_desc`)}
         </p>
       </div>
+    </>
+  );
+
+  if (comingSoon) {
+    return (
+      <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card opacity-90">
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+    >
+      {inner}
     </Link>
   );
 }
@@ -248,6 +264,13 @@ function BadgePill({ type }: { type: Exclude<Badge, null> }) {
     return (
       <span className="absolute top-3 right-3 z-10 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">
         HOT
+      </span>
+    );
+  }
+  if (type === 'soon') {
+    return (
+      <span className="absolute top-3 right-3 z-10 rounded-full bg-neutral-500 px-2 py-0.5 text-[10px] font-bold text-white">
+        SOON
       </span>
     );
   }

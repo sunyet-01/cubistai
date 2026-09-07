@@ -6,6 +6,13 @@
  * product_id is honored, and everything else is looked up here.
  *
  * To change pricing, edit this file and redeploy. Admin UI cannot alter prices.
+ *
+ * NOTE: kept in sync with the pricing page UI (src/blocks/pricing.tsx):
+ *   Free   $0      — 10 credits/day
+ *   Starter $7.90  — 1,100 credits/mo
+ *   Plus    $14.90 — 2,000 credits/mo
+ *   Pro     $27.90 — 4,000 credits/mo
+ * Yearly = 12 months of credits at ~20% off.
  */
 
 import { PaymentInterval, PaymentType } from '@/core/payment/types';
@@ -30,7 +37,6 @@ export type PricingProduct = {
 };
 
 /**
- * Default demo catalog. Replace with your real products when launching.
  * Keys MUST match what the pricing UI sends as product_id.
  */
 export const pricingCatalog: Record<string, PricingProduct> = {
@@ -40,14 +46,21 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Starter',
     description: 'Starter Monthly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 900,
+    priceInCents: 790,
     currency: 'usd',
-    credits: 5000,
-    plan: {
-      name: 'Starter',
-      interval: PaymentInterval.MONTH,
-      intervalCount: 1,
-    },
+    credits: 1100,
+    plan: { name: 'Starter', interval: PaymentInterval.MONTH, intervalCount: 1 },
+  },
+  plus_monthly: {
+    productId: 'plus_monthly',
+    productName: 'Plus',
+    planName: 'Plus',
+    description: 'Plus Monthly',
+    type: PaymentType.SUBSCRIPTION,
+    priceInCents: 1490,
+    currency: 'usd',
+    credits: 2000,
+    plan: { name: 'Plus', interval: PaymentInterval.MONTH, intervalCount: 1 },
   },
   pro_monthly: {
     productId: 'pro_monthly',
@@ -55,25 +68,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Pro',
     description: 'Pro Monthly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 2900,
+    priceInCents: 2790,
     currency: 'usd',
-    credits: 50000,
+    credits: 4000,
     plan: { name: 'Pro', interval: PaymentInterval.MONTH, intervalCount: 1 },
-  },
-  enterprise_monthly: {
-    productId: 'enterprise_monthly',
-    productName: 'Enterprise',
-    planName: 'Enterprise',
-    description: 'Enterprise Monthly',
-    type: PaymentType.SUBSCRIPTION,
-    priceInCents: 9900,
-    currency: 'usd',
-    credits: 500000,
-    plan: {
-      name: 'Enterprise',
-      interval: PaymentInterval.MONTH,
-      intervalCount: 1,
-    },
   },
   starter_yearly: {
     productId: 'starter_yearly',
@@ -81,10 +79,21 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Starter',
     description: 'Starter Yearly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 8600,
+    priceInCents: 7500,
     currency: 'usd',
-    credits: 60000,
+    credits: 13200,
     plan: { name: 'Starter', interval: PaymentInterval.YEAR, intervalCount: 1 },
+  },
+  plus_yearly: {
+    productId: 'plus_yearly',
+    productName: 'Plus',
+    planName: 'Plus',
+    description: 'Plus Yearly',
+    type: PaymentType.SUBSCRIPTION,
+    priceInCents: 13900,
+    currency: 'usd',
+    credits: 24000,
+    plan: { name: 'Plus', interval: PaymentInterval.YEAR, intervalCount: 1 },
   },
   pro_yearly: {
     productId: 'pro_yearly',
@@ -92,55 +101,10 @@ export const pricingCatalog: Record<string, PricingProduct> = {
     planName: 'Pro',
     description: 'Pro Yearly',
     type: PaymentType.SUBSCRIPTION,
-    priceInCents: 27800,
+    priceInCents: 25900,
     currency: 'usd',
-    credits: 600000,
+    credits: 48000,
     plan: { name: 'Pro', interval: PaymentInterval.YEAR, intervalCount: 1 },
-  },
-  enterprise_yearly: {
-    productId: 'enterprise_yearly',
-    productName: 'Enterprise',
-    planName: 'Enterprise',
-    description: 'Enterprise Yearly',
-    type: PaymentType.SUBSCRIPTION,
-    priceInCents: 95000,
-    currency: 'usd',
-    credits: 6000000,
-    plan: {
-      name: 'Enterprise',
-      interval: PaymentInterval.YEAR,
-      intervalCount: 1,
-    },
-  },
-  starter_lifetime: {
-    productId: 'starter_lifetime',
-    productName: 'Starter',
-    planName: 'Starter Lifetime',
-    description: 'Starter Lifetime',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 14900,
-    currency: 'usd',
-    credits: 100000,
-  },
-  pro_lifetime: {
-    productId: 'pro_lifetime',
-    productName: 'Pro',
-    planName: 'Pro Lifetime',
-    description: 'Pro Lifetime',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 49900,
-    currency: 'usd',
-    credits: 1000000,
-  },
-  enterprise_lifetime: {
-    productId: 'enterprise_lifetime',
-    productName: 'Enterprise',
-    planName: 'Enterprise Lifetime',
-    description: 'Enterprise Lifetime',
-    type: PaymentType.ONE_TIME,
-    priceInCents: 199900,
-    currency: 'usd',
-    credits: 10000000,
   },
 };
 

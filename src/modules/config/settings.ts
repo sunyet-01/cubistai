@@ -239,6 +239,15 @@ export function getSettings(): Setting[] {
       group: 'appinfo',
       tab: 'general',
     },
+    {
+      name: 'support_email',
+      title: 'Support Email',
+      type: 'text',
+      placeholder: 'support@example.com',
+      tip: 'Shown in the footer and support widget (public, no login needed). Falls back to the SUPPORT_EMAIL env var.',
+      group: 'appinfo',
+      tab: 'general',
+    },
 
     // ─── General / User Roles ────────────────────────────────────────
     {
@@ -286,6 +295,27 @@ export function getSettings(): Setting[] {
       title: 'Description',
       type: 'text',
       placeholder: 'Welcome bonus',
+      group: 'credit',
+      tab: 'general',
+    },
+
+    // ─── General / Credit consumption ────────────────────────────────
+    {
+      name: 'image_credit_cost',
+      title: 'Default credits per image',
+      type: 'number',
+      placeholder: '12',
+      tip: 'Credits charged for each image generation when no per-model override matches. 0 disables charging.',
+      group: 'credit',
+      tab: 'general',
+      defaultValue: '12',
+    },
+    {
+      name: 'model_credit_costs',
+      title: 'Per-model credit costs (JSON)',
+      type: 'textarea',
+      placeholder: '{"google/nano-banana-2": 8, "black-forest-labs/flux-2-max": 25}',
+      tip: 'Optional JSON mapping model id → credits per image. Models without an entry use the default above.',
       group: 'credit',
       tab: 'general',
     },
@@ -397,6 +427,7 @@ export function getSettings(): Setting[] {
       options: [
         { label: 'Stripe', value: 'stripe' },
         { label: 'Creem', value: 'creem' },
+        { label: 'Waffo', value: 'waffo' },
         { label: 'PayPal', value: 'paypal' },
         { label: 'Alipay', value: 'alipay' },
         { label: 'WeChat Pay', value: 'wechat' },
@@ -489,6 +520,61 @@ export function getSettings(): Setting[] {
       type: 'number',
       placeholder: '留空使用实际金额，填 1 则支付 $0.01',
       group: 'creem',
+      tab: 'payment',
+    },
+
+    // ─── Payment / Waffo ─────────────────────────────────────────────
+    {
+      name: 'waffo_enabled',
+      title: 'Enable Waffo',
+      type: 'switch',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_merchant_id',
+      title: 'Merchant ID',
+      type: 'text',
+      placeholder: 'MER_xxx',
+      group: 'waffo',
+      tab: 'payment',
+      description:
+        'From Waffo Pancake Dashboard → API & Development. Falls back to the WAFFO_MERCHANT_ID env var.',
+    },
+    {
+      name: 'waffo_private_key',
+      title: 'Private Key',
+      type: 'password',
+      placeholder: '-----BEGIN PRIVATE KEY----- ...',
+      group: 'waffo',
+      tab: 'payment',
+      description:
+        'RSA private key (PEM or raw base64). Falls back to the WAFFO_PRIVATE_KEY env var. Stored encrypted.',
+    },
+    {
+      name: 'waffo_store_id',
+      title: 'Store ID',
+      type: 'text',
+      placeholder: 'STO_xxx',
+      group: 'waffo',
+      tab: 'payment',
+      description: 'The store under which products are created.',
+    },
+    {
+      name: 'waffo_product_ids_mapping',
+      title: 'Product IDs Mapping',
+      type: 'textarea',
+      placeholder: '{"starter_monthly": "PROD_xxx"}',
+      tip: 'Map pricing catalog product_id → Waffo product ID. Leave empty to auto-create products on first checkout (cached in memory).',
+      group: 'waffo',
+      tab: 'payment',
+    },
+    {
+      name: 'waffo_test_amount',
+      title: 'Test amount (cents)',
+      type: 'number',
+      placeholder: '留空使用实际金额，填 1 则支付 $0.01',
+      group: 'waffo',
       tab: 'payment',
     },
 
@@ -846,6 +932,26 @@ export function getSettings(): Setting[] {
       type: 'password',
       placeholder: 'xxx',
       group: 'fal',
+      tab: 'ai',
+    },
+
+    // ─── AI / Content Safety ─────────────────────────────────────────
+    {
+      name: 'content_safety_api_key',
+      title: 'Content Safety API Key',
+      type: 'password',
+      placeholder: 'wfp_xxx',
+      group: 'content_safety',
+      tab: 'ai',
+      description:
+        'Optional pre-generation prompt safety scanning (e.g. Waffo Pancake scan-prompt). When set, every generation prompt is scanned before the image model runs; blocked prompts return a friendly error. Leave empty to rely on the built-in filter.',
+    },
+    {
+      name: 'content_safety_endpoint',
+      title: 'Content Safety Endpoint',
+      type: 'text',
+      placeholder: 'https://api.waffo.ai',
+      group: 'content_safety',
       tab: 'ai',
     },
 

@@ -1,7 +1,7 @@
-import { and, asc, desc, eq, gt, isNull, or, sql, sum } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, gt, isNull, or, sql, sum } from 'drizzle-orm';
 
 import { db } from '@/core/db';
-import { credit } from '@/config/db/schema';
+import { credit, subscription } from '@/config/db/schema';
 import { getSnowId, getUuid } from '@/lib/hash';
 
 // --- Enums ---
@@ -283,6 +283,69 @@ export async function grantForNewUser(params: {
     scene: CreditTransactionScene.GIFT,
     expiresAt,
   });
+}
+
+// --- Daily free allowance (lazy, on first generate of the day) ---
+
+/**
+ * Grants the free-tier daily allowance (default 10 credits) once per day for
+ * users without an active paid subscription. Called lazily right before
+ * charging a generation, so no cron/scheduler is needed. Credits expire at
+ * end of day (UTC+0 local midnight of the server).
+ */
+export async function ensureDailyFreeCredits(params: {
+  userId: string;
+  userEmail?: string;
+  dailyAmount?: number;
+}): Promise<boolean> {
+  const { userId, userEmail } = params;
+  const amount = params.dailyAmount || 10;
+  if (amount <= 0) return false;
+
+  // Skip users with an active subscription — their plan credits already apply.
+  const [activeSub] = await db()
+    .select({ id: subscription.id })
+    .from(subscription)
+    .where(
+      and(
+        eq(subscription.userId, userId),
+        eq(subscription.status, 'active')
+      )
+    )
+    .limit(1);
+  if (activeSub) return false;
+
+  // Already granted today?
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const [existing] = await db()
+    .select({ id: credit.id })
+    .from(credit)
+    .where(
+      and(
+        eq(credit.userId, userId),
+        eq(credit.transactionType, CreditTransactionType.GRANT),
+        eq(credit.transactionScene, 'daily'),
+        gte(credit.createdAt, todayStart),
+        isNull(credit.deletedAt)
+      )
+    )
+    .limit(1);
+  if (existing) return false;
+
+  const expiresAt = new Date();
+  expiresAt.setHours(23, 59, 59, 999); // valid for the rest of the day
+
+  await grant({
+    userId,
+    userEmail,
+    credits: amount,
+    description: 'Daily free credits',
+    scene: 'daily',
+    expiresAt,
+  });
+
+  return true;
 }
 
 // --- History ---

@@ -34,6 +34,12 @@ export const envConfigs: Record<string, string> = {
   auth_url: procEnv.AUTH_URL ?? publicEnv('VITE_APP_URL') ?? '',
   auth_secret: procEnv.AUTH_SECRET ?? '',
 
+  // Support
+  support_email:
+    publicEnv('VITE_SUPPORT_EMAIL') ??
+    procEnv.SUPPORT_EMAIL ??
+    'support@cubistai.org',
+
   // Payment - Stripe
   stripe_secret_key: procEnv.STRIPE_SECRET_KEY ?? '',
   stripe_publishable_key: procEnv.STRIPE_PUBLISHABLE_KEY ?? '',
@@ -81,6 +87,14 @@ export const envConfigs: Record<string, string> = {
   replicate_api_token: procEnv.REPLICATE_API_TOKEN ?? '',
   openrouter_api_key: procEnv.OPENROUTER_API_KEY ?? '',
   kie_api_key: procEnv.KIE_API_KEY ?? '',
+  // Content safety (optional pre-generation prompt scanning)
+  // Mode 1 (preferred): Waffo Pancake SDK — merchantId + RSA private key.
+  // Mode 2 (fallback): plain HTTP scan-prompt with a bearer API key.
+  content_safety_api_key: procEnv.CONTENT_SAFETY_API_KEY ?? '',
+  content_safety_endpoint: procEnv.CONTENT_SAFETY_ENDPOINT ?? '',
+  waffo_merchant_id: procEnv.WAFFO_MERCHANT_ID ?? '',
+  waffo_private_key: procEnv.WAFFO_PRIVATE_KEY ?? '',
+  waffo_store_id: procEnv.WAFFO_STORE_ID ?? '',
 
   // Locale (public)
   locale: publicEnv('VITE_DEFAULT_LOCALE') ?? 'en',

@@ -28,9 +28,51 @@ import {
 const ALL_PROVIDERS: PaymentProvider[] = [
   'stripe',
   'creem',
+  'waffo',
   'paypal',
   'alipay',
   'wechat',
+];
+
+// Full list of AI models actually invoked by the platform (kept in sync with
+// the editor's model picker). Disclosed here per platform review requirements.
+const DISCLOSED_MODELS = [
+  {
+    name: 'Nano Banana 2',
+    slug: 'google/nano-banana-2',
+    developer: 'Google DeepMind',
+    source: 'OpenRouter / Kie.ai',
+  },
+  {
+    name: 'Seedream 4.5',
+    slug: 'bytedance/seedream-4.5',
+    developer: 'ByteDance',
+    source: 'OpenRouter / Kie.ai',
+  },
+  {
+    name: 'Nano Banana Pro',
+    slug: 'google/nano-banana-pro',
+    developer: 'Google DeepMind',
+    source: 'OpenRouter / Kie.ai',
+  },
+  {
+    name: 'Seedream 5 Lite',
+    slug: 'bytedance/seedream-5-lite',
+    developer: 'ByteDance',
+    source: 'OpenRouter / Kie.ai',
+  },
+  {
+    name: 'FLUX.2 Pro',
+    slug: 'black-forest-labs/flux-2-pro',
+    developer: 'Black Forest Labs',
+    source: 'OpenRouter / Kie.ai',
+  },
+  {
+    name: 'FLUX.2 Max',
+    slug: 'black-forest-labs/flux-2-max',
+    developer: 'Black Forest Labs',
+    source: 'OpenRouter / Kie.ai',
+  },
 ];
 
 export function Pricing({ title }: { title?: string } = {}) {
@@ -52,7 +94,7 @@ export function Pricing({ title }: { title?: string } = {}) {
   // Free plan features
   const freeFeatures = [
     { icon: Sparkles, label: m['landing.pricing.feature_daily']() },
-    { icon: Check, label: m['landing.pricing.feature_4_models']() },
+    { icon: Check, label: m['landing.pricing.feature_6_models']() },
     { icon: Check, label: m['landing.pricing.feature_1k']() },
     { icon: Check, label: m['landing.pricing.feature_1x1']() },
     { icon: Check, label: m['landing.pricing.feature_image_only']() },
@@ -72,20 +114,18 @@ export function Pricing({ title }: { title?: string } = {}) {
   // Plus (most popular)
   const plusFeatures = [
     { icon: Zap, label: m['landing.pricing.feature_2000']() },
-    { icon: Check, label: m['landing.pricing.feature_7_models']() },
+    { icon: Check, label: m['landing.pricing.feature_6_models']() },
     { icon: Check, label: m['landing.pricing.feature_4k']() },
     { icon: Check, label: m['landing.pricing.feature_2x2']() },
-    { icon: Check, label: m['landing.pricing.feature_3video']() },
     { icon: Check, label: m['landing.pricing.feature_permanent']() },
     { icon: Check, label: m['landing.pricing.feature_noads']() },
   ];
   // Pro
   const proFeatures = [
     { icon: Zap, label: m['landing.pricing.feature_4000']() },
-    { icon: Check, label: m['landing.pricing.feature_9_models']() },
+    { icon: Check, label: m['landing.pricing.feature_6_models']() },
     { icon: Check, label: m['landing.pricing.feature_4k']() },
     { icon: Check, label: m['landing.pricing.feature_4x4']() },
-    { icon: Check, label: m['landing.pricing.feature_allvideo']() },
     { icon: Check, label: m['landing.pricing.feature_permanent']() },
     { icon: Check, label: m['landing.pricing.feature_noads']() },
     { icon: Check, label: m['landing.pricing.feature_rollover']() },
@@ -303,6 +343,46 @@ export function Pricing({ title }: { title?: string } = {}) {
           </p>
         </div>
         <PricingTable groups={groups} onCheckout={handleCheckout} />
+
+        {/* Model & data source disclosure (required by platform review) */}
+        <div className="border-border mt-14 rounded-2xl border p-6 sm:p-8">
+          <h3 className="text-foreground text-lg font-semibold tracking-tight">
+            {m['landing.pricing.models_title']()}
+          </h3>
+          <p className="text-muted-foreground mt-2 text-sm leading-6">
+            {m['landing.pricing.models_description']()}
+          </p>
+          <div className="mt-6 overflow-x-auto">
+            <table className="text-foreground/90 w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-border border-b text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="py-2 pr-4 font-medium">Model</th>
+                  <th className="py-2 pr-4 font-medium">Model ID</th>
+                  <th className="py-2 pr-4 font-medium">Developer</th>
+                  <th className="py-2 font-medium">Access Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DISCLOSED_MODELS.map((model) => (
+                  <tr key={model.slug} className="border-border border-b last:border-0">
+                    <td className="py-2.5 pr-4 font-medium">{model.name}</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs text-muted-foreground">
+                      {model.slug}
+                    </td>
+                    <td className="py-2.5 pr-4">{model.developer}</td>
+                    <td className="py-2.5">{model.source}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-muted-foreground mt-4 text-xs leading-5">
+            {m['landing.pricing.models_note']()}
+          </p>
+          <p className="border-border text-muted-foreground mt-4 border-t pt-4 text-xs leading-5">
+            {m['landing.pricing.credits_note']()}
+          </p>
+        </div>
       </div>
 
       <PaymentProviderModal
