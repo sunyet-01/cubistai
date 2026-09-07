@@ -6,4 +6,5 @@ export const localeNames: Record<string, string> = {
   zh: '简体中文',
   'zh-tw': '繁體中文',
   ja: '日本語',
+  ko: '한국어',
 };
